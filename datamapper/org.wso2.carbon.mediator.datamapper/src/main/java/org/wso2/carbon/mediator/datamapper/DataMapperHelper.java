@@ -34,9 +34,9 @@ public class DataMapperHelper {
 
 		//FIXME This need to be fixed with proper file based implementation
 		// and this can be fixed once the backend is supported inputstreams
-		File configFile = getFileFromKey(context, configkey, "dm_config.txt");
-		File inSchemaFile = getFileFromKey(context, inSchemaKey, "dm_input.txt");
-	    File outSchemaFile = getFileFromKey(context, outSchemaKey, "dm_output.txt");
+		InputStream configFile = getInputStream(context, configkey, "dm_config.txt");
+		InputStream inSchemaFile = getInputStream(context, inSchemaKey, "dm_input.txt");
+		InputStream outSchemaFile = getInputStream(context, outSchemaKey, "dm_output.txt");
 		
 		OMElement inputMessage = context.getEnvelope().getBody().getFirstElement();
 		InputStream inStream = new ByteArrayInputStream(inputMessage.toString().getBytes());
@@ -155,31 +155,16 @@ public class DataMapperHelper {
 	}
 
 	//FIXME This need to be implemented as to return InputStream not the file
-	private static File getFileFromKey(MessageContext context, String configkey, String filename) {
+	private static InputStream getInputStream(MessageContext context, String configkey, String filename) {
 			
-			File configFile = null;
+			InputStream is = null;
 			Object configEntry = context.getEntry(configkey);
 	        if (configEntry instanceof OMTextImpl){
 	        	OMTextImpl text = (OMTextImpl)configEntry;
 	        	String ips = text.getText();
-	        	configFile = getTempFileFromText(ips, filename);
+	        	is = new ByteArrayInputStream(ips.getBytes());
 	        }
-	        return configFile;
+	        return is;
 	 }
 	    
-	 //FIXME This need to be fixed with proper file based implementation
-	 private static File getTempFileFromText(String text, String name) {
-	    	File file = null;
-	        try {
-	          file = new File(name);
-	          BufferedWriter output = new BufferedWriter(new FileWriter(file));
-	          output.write(text);
-	          output.close();
-	        } catch ( IOException e ) {
-	           e.printStackTrace();
-	        }
-	        
-	        return file;
-	 }
-
 }
