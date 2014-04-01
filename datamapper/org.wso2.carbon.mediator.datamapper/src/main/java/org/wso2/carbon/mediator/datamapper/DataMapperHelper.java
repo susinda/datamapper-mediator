@@ -32,11 +32,9 @@ public class DataMapperHelper {
 
 	public static boolean mediateDataMapper(MessageContext context, String configkey, String inSchemaKey, String outSchemaKey) {
 
-		//FIXME This need to be fixed with proper file based implementation
-		// and this can be fixed once the backend is supported inputstreams
-		InputStream configFile = getInputStream(context, configkey, "dm_config.txt");
-		InputStream inSchemaFile = getInputStream(context, inSchemaKey, "dm_input.txt");
-		InputStream outSchemaFile = getInputStream(context, outSchemaKey, "dm_output.txt");
+		InputStream configFileInputStream = getInputStream(context, configkey);
+		InputStream inputSchemaStream = getInputStream(context, inSchemaKey);
+		InputStream outputSchemaStream = getInputStream(context, outSchemaKey);
 		
 		OMElement inputMessage = context.getEnvelope().getBody().getFirstElement();
 		InputStream inStream = new ByteArrayInputStream(inputMessage.toString().getBytes());
@@ -44,7 +42,7 @@ public class DataMapperHelper {
 		try {
 
 			DataMapper mapper = new DataMapper();
-			String finalOutput = mapper.doMap(configFile, inStream, inSchemaFile, outSchemaFile);
+			String finalOutput = mapper.doMap(configFileInputStream, inStream, inputSchemaStream, outputSchemaStream);
 
 			StringBuilder result = new StringBuilder(finalOutput);
 			OMElement outmessage = parseJsonToXml(result);
@@ -155,16 +153,16 @@ public class DataMapperHelper {
 	}
 
 	//FIXME This need to be implemented as to return InputStream not the file
-	private static InputStream getInputStream(MessageContext context, String configkey, String filename) {
+	private static InputStream getInputStream(MessageContext context, String configkey) {
 			
-			InputStream is = null;
+			InputStream inputStream = null;
 			Object configEntry = context.getEntry(configkey);
 	        if (configEntry instanceof OMTextImpl){
 	        	OMTextImpl text = (OMTextImpl)configEntry;
-	        	String ips = text.getText();
-	        	is = new ByteArrayInputStream(ips.getBytes());
+	        	String content = text.getText();
+	        	inputStream = new ByteArrayInputStream(content.getBytes());
 	        }
-	        return is;
+	        return inputStream;
 	 }
 	    
 }
