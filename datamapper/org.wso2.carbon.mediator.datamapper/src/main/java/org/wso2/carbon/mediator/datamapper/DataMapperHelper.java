@@ -27,6 +27,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
 import org.wso2.datamapper.engine.core.DataMapper;
+import org.wso2.datamapper.engine.models.MappingResourceModel;
 
 public class DataMapperHelper {
 
@@ -36,13 +37,14 @@ public class DataMapperHelper {
 		InputStream inputSchemaStream = getInputStream(context, inSchemaKey);
 		InputStream outputSchemaStream = getInputStream(context, outSchemaKey);
 		
-		OMElement inputMessage = context.getEnvelope().getBody().getFirstElement();
+		OMElement inputMessage = context.getEnvelope();
 		InputStream inStream = new ByteArrayInputStream(inputMessage.toString().getBytes());
 
 		try {
 
 			DataMapper mapper = new DataMapper();
-			String finalOutput = mapper.doMap(configFileInputStream, inStream, inputSchemaStream, outputSchemaStream);
+			MappingResourceModel mappingResourceModel = new MappingResourceModel(inputSchemaStream, outputSchemaStream, configFileInputStream);
+			String finalOutput = mapper.doMap(inputMessage, mappingResourceModel);
 
 			StringBuilder result = new StringBuilder(finalOutput);
 			OMElement outmessage = parseJsonToXml(result);
